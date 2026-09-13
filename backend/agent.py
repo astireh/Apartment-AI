@@ -87,7 +87,9 @@ class ApartmentAgent:
         # Квартира, для которой пользователь начал бронирование
         self.pending_booking_apartment = None
 
-        # Ожидаемое действие при бронировании: "type" — пользователь должен выбрать тип брони; "payment" — пользователь должен подтвердить оплату
+        # Шаг бронирования:
+        # "type" — выбор типа брони;
+        # "payment" — подтверждение оплаты.
         self.booking_step = None
 
     # --------------------------------------------------
@@ -145,7 +147,7 @@ class ApartmentAgent:
         if not apartments:
             return None
 
-        #Сначала предпочитаем более дешёвые варианты. При одинаковой цене — большую площадь.
+        # Сначала предпочитаем более дешёвые варианты. При одинаковой цене — большую площадь.
         best_apartment = min(
             apartments,
             key=lambda apartment: (
@@ -260,7 +262,7 @@ class ApartmentAgent:
             f"Она находится на {floor} этаже, "
             f"отделка — {finishing.lower()}. "
             f"Среди найденных вариантов это самый доступный "
-           f"вариант, который подходит под ваши условия."
+            f"вариант, который подходит под ваши условия."
         )
 
         return {
@@ -477,15 +479,26 @@ class ApartmentAgent:
                 "Сначала нужно получить список ЖК."
             )
 
-        selected = parse_complex_selection(
+        selected_ids = parse_complex_selection(
             user_text,
             self.last_complexes
         )
 
-        if not selected:
+        if not selected_ids:
             return make_error(
                 "INVALID_REQUEST",
                 "Не удалось определить, какие ЖК вы выбрали."
+            )
+
+        selected = [
+            complex_data
+            for complex_data in self.last_complexes
+            if complex_data[0] in selected_ids
+        ]
+
+        if not selected:
+            return make_error(
+                "COMPLEX_NOT_FOUND"
             )
 
         self.selected_complex_ids = [
@@ -1268,6 +1281,36 @@ class ApartmentAgent:
 
             # Если новых фильтров нет, действительно нужны просто альтернативы.
             return self._alternatives()
+
+
+        # --------------------------------------------------
+        # ЖК
+        # --------------------------------------------------
+
+        if intent == "complex":
+
+            # Если список ЖК ещё не показывали,
+            # загружаем все ЖК из базы.
+            if not self.last_complexes:
+
+                self.last_complexes = get_all_complexes()
+
+                return {
+                    "type": "selection",
+                    "message": "Доступные жилые комплексы:",
+                    "filters": self.current_filters.copy(),
+                    "complexes": self._complexes_to_dict(
+                        self.last_complexes
+                    ),
+                    "apartments": [],
+                    "selected_complex_ids": [],
+                    "selected_apartment_ids": []
+                }
+
+            return self._select_complexes(
+                user_text
+            )
+
 
         # --------------------------------------------------
         # Объяснение рекомендации

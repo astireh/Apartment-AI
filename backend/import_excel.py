@@ -7,7 +7,7 @@ DATABASE_FILE = "apartments.db"
 
 
 def import_excel_to_database():
-    """Импортирует данные из Excel в SQLite."""
+    """Импортирует и обновляет данные из Excel в SQLite."""
 
     print()
     print("Начинаю импорт данных из Excel...")
@@ -42,7 +42,8 @@ def import_excel_to_database():
             completion_year INTEGER,
             description TEXT,
             infrastructure TEXT,
-            parking TEXT
+            parking TEXT,
+            image TEXT
         )
     """)
 
@@ -66,22 +67,30 @@ def import_excel_to_database():
     """)
 
     # -------------------------------------------------
-    # Очищаем старые данные
+    # Проверяем наличие image у старой таблицы ЖК
     # -------------------------------------------------
 
     cursor.execute(
-        "DELETE FROM apartments"
+        "PRAGMA table_info(residential_complexes)"
     )
 
-    cursor.execute(
-        "DELETE FROM residential_complexes"
-    )
+    complex_columns = [
+        row[1]
+        for row in cursor.fetchall()
+    ]
+
+    if "image" not in complex_columns:
+        cursor.execute("""
+            ALTER TABLE residential_complexes
+            ADD COLUMN image TEXT
+        """)
 
     # -------------------------------------------------
     # Импорт ЖК
     # -------------------------------------------------
 
-    complex_count = 0
+    complex_added = 0
+    complex_updated = 0
 
     for row in sheet_complexes.iter_rows(
         min_row=2,
@@ -99,39 +108,82 @@ def import_excel_to_database():
             completion_year,
             description,
             infrastructure,
-            parking
+            parking,
+            image
         ) = row
 
+        # Проверяем, существует ли ЖК
         cursor.execute("""
-            INSERT INTO residential_complexes (
-                id,
+            SELECT id
+            FROM residential_complexes
+            WHERE id = ?
+        """, (complex_id,))
+
+        existing_complex = cursor.fetchone()
+
+        if existing_complex:
+            # Обновляем существующий ЖК
+            cursor.execute("""
+                UPDATE residential_complexes
+                SET
+                    name = ?,
+                    district = ?,
+                    housing_class = ?,
+                    completion_year = ?,
+                    description = ?,
+                    infrastructure = ?,
+                    parking = ?,
+                    image = ?
+                WHERE id = ?
+            """, (
                 name,
                 district,
                 housing_class,
                 completion_year,
                 description,
                 infrastructure,
-                parking
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            complex_id,
-            name,
-            district,
-            housing_class,
-            completion_year,
-            description,
-            infrastructure,
-            parking
-        ))
+                parking,
+                image,
+                complex_id
+            ))
 
-        complex_count += 1
+            complex_updated += 1
+
+        else:
+            # Добавляем новый ЖК
+            cursor.execute("""
+                INSERT INTO residential_complexes (
+                    id,
+                    name,
+                    district,
+                    housing_class,
+                    completion_year,
+                    description,
+                    infrastructure,
+                    parking,
+                    image
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                complex_id,
+                name,
+                district,
+                housing_class,
+                completion_year,
+                description,
+                infrastructure,
+                parking,
+                image
+            ))
+
+            complex_added += 1
 
     # -------------------------------------------------
     # Импорт квартир
     # -------------------------------------------------
 
-    apartment_count = 0
+    apartment_added = 0
+    apartment_updated = 0
 
     for row in sheet_apartments.iter_rows(
         min_row=2,
@@ -153,45 +205,101 @@ def import_excel_to_database():
             image
         ) = row
 
+        # Проверяем, существует ли квартира
         cursor.execute("""
-            INSERT INTO apartments (
-                id,
+            SELECT id
+            FROM apartments
+            WHERE id = ?
+        """, (apartment_id,))
+
+        existing_apartment = cursor.fetchone()
+
+        if existing_apartment:
+            # Обновляем только данные квартиры.
+            # Данные бронирования НЕ трогаем.
+            cursor.execute("""
+                UPDATE apartments
+                SET
+                    complex_id = ?,
+                    rooms = ?,
+                    area = ?,
+                    price = ?,
+                    floor = ?,
+                    finishing = ?,
+                    balcony = ?,
+                    image = ?
+                WHERE id = ?
+            """, (
                 complex_id,
                 rooms,
                 area,
                 price,
                 floor,
                 finishing,
-               balcony,
+                balcony,
+                image,
+                apartment_id
+            ))
+
+            apartment_updated += 1
+
+        else:
+            # Добавляем новую квартиру.
+            # Для неё booking_status автоматически будет "available".
+            cursor.execute("""
+                INSERT INTO apartments (
+                    id,
+                    complex_id,
+                    rooms,
+                    area,
+                    price,
+                    floor,
+                    finishing,
+                    balcony,
+                    image
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                apartment_id,
+                complex_id,
+                rooms,
+                area,
+                price,
+                floor,
+                finishing,
+                balcony,
                 image
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            apartment_id,
-            complex_id,
-            rooms,
-            area,
-            price,
-            floor,
-            finishing,
-            balcony,
-            image
-        ))
+            ))
 
-        apartment_count += 1
+            apartment_added += 1
 
+    # -------------------------------------------------
     # Сохраняем изменения
+    # -------------------------------------------------
+
     connection.commit()
 
     # Закрываем соединение
     connection.close()
 
+    # -------------------------------------------------
+    # Результат
+    # -------------------------------------------------
+
     print(
-        f"Импортировано ЖК: {complex_count}"
+        f"ЖК добавлено: {complex_added}"
     )
 
     print(
-        f"Импортировано квартир: {apartment_count}"
+        f"ЖК обновлено: {complex_updated}"
+    )
+
+    print(
+        f"Квартир добавлено: {apartment_added}"
+    )
+
+    print(
+        f"Квартир обновлено: {apartment_updated}"
     )
 
     print()

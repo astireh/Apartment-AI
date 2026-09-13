@@ -21,6 +21,8 @@ def ask_gigachat(prompt):
         giga = GigaChat(
             credentials=GIGACHAT_CREDENTIALS,
             model="GigaChat-2",
+            # Отключено для совместимости с окружением хакатона.
+            # В production необходимо использовать проверку сертификатов.
             verify_ssl_certs=False
         )
 
@@ -434,7 +436,7 @@ def parse_apartment_selection(user_text, apartments):
                     selected.append(apartment)
 
     # --------------------------------------------------
-    # 1.5. Выбор по номеру варианта
+    # 2. Выбор по номеру варианта
     # --------------------------------------------------
 
     variant_matches = re.findall(
@@ -455,7 +457,7 @@ def parse_apartment_selection(user_text, apartments):
                 selected.append(apartment)
 
     # --------------------------------------------------
-    # 2. Выбор по ID
+    # 3. Выбор квартиры по ID
     # --------------------------------------------------
 
     id_matches = re.findall(
@@ -463,8 +465,21 @@ def parse_apartment_selection(user_text, apartments):
         text
     )
 
+    for apartment_id_text in id_matches:
+
+        apartment_id = int(apartment_id_text)
+
+        for apartment in apartments:
+
+            if apartment[0] == apartment_id:
+
+                if apartment not in selected:
+                    selected.append(apartment)
+
+                break
+
     # --------------------------------------------------
-    # 3. Выбор по фразе "квартира 3"
+    # 4. Фраза "квартира 13" означает ID квартиры
     # --------------------------------------------------
 
     apartment_matches = re.findall(
@@ -474,25 +489,7 @@ def parse_apartment_selection(user_text, apartments):
 
     for number_text in apartment_matches:
 
-        number = int(number_text)
-        index = number - 1
-
-        if 0 <= index < len(apartments):
-
-            apartment = apartments[index]
-
-            if apartment not in selected:
-                selected.append(apartment)
-
-    # --------------------------------------------------
-    # 4. Находим квартиры по явному ID
-    # --------------------------------------------------
-
-    for apartment_id_text in id_matches:
-
-        apartment_id = int(
-            apartment_id_text
-        )
+        apartment_id = int(number_text)
 
         for apartment in apartments:
 
@@ -1121,9 +1118,23 @@ def detect_basic_intent(user_text, complexes=None):
     if is_apartment_selection_request(text):
         return "apartment"
 
-    # Информационные запросы
-    if is_information_request(text):
-        return "information"
+
+    # Запрос списка жилых комплексов
+    complex_list_phrases = [
+        "покажи жк",
+        "показать жк",
+        "какие жк",
+        "какие есть жк",
+        "какие жилые комплексы",
+        "покажи жилые комплексы",
+        "показать жилые комплексы",
+        "список жк",
+        "список жилых комплексов"
+    ]
+
+    if any(phrase in text for phrase in complex_list_phrases):
+        return "complex"
+    
 
     # Явные фильтры и изменение уже заданных параметров
     filter_words = [

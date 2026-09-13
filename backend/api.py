@@ -4,11 +4,8 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from agent import ApartmentAgent
-from database import (
-    create_database,
-    add_test_apartments,
-    update_complex_images
-)
+from database import create_database
+from import_excel import import_excel_to_database
 
 
 app = FastAPI(
@@ -17,21 +14,30 @@ app = FastAPI(
     version="1.0.0"
 )
 
+
+# Разрешаем frontend обращаться к backend.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.mount("/images", StaticFiles(directory="images"), name="images")
 
+
+# Делаем изображения доступными для frontend.
+app.mount(
+    "/images",
+    StaticFiles(directory="images"),
+    name="images"
+)
+
+
+# Создаём базу данных и загружаем актуальные данные из Excel.
 create_database()
-add_test_apartments()
-update_complex_images()
+import_excel_to_database()
 
 
-# Храним отдельного агента для каждого пользователя.
-# Благодаря этому каждый пользователь сохраняет свой контекст диалога.
+# Отдельный агент для каждой пользовательской сессии.
 agents = {}
 
 
