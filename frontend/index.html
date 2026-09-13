@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>КвартираИИ — продажа квартир в Воронеже</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #12233f;
+      --navy-2: #0b1930;
+      --navy-soft: #294876;
+      --orange: #f2941e;
+      --orange-dark: #d97b0c;
+      --blue: #2f8fd1;
+      --blue-deep: #1c5e91;
+      --cream: #f7f5f0;
+      --line: #12233f;
+      --line-soft: #d7dbe2;
+      --ink: #12233f;
+      --ink-soft: #48566c;
+      --radius: 14px;
+      --radius-pill: 999px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Manrope', system-ui, sans-serif;
+      color: var(--ink);
+      background: #fff;
+      -webkit-font-smoothing: antialiased;
+      position: relative;
+    }
+
+    /* Зерно/шум поверх всей страницы */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: .05;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 140px 140px;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    img,
+    svg {
+      display: block;
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+
+    .reveal.in {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ---------- Isometric cube logo ---------- */
+    .iso-cube {
+      position: relative;
+      width: 34px;
+      height: 34px;
+      flex-shrink: 0;
+    }
+
+    .iso-cube .f-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 58%;
+      background: var(--orange);
+      clip-path: polygon(50% 0, 100% 27%, 50% 54%, 0 27%);
+    }
+
+    .iso-cube .f-left {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 50%;
+      height: 60%;
+      background: #e7ebf0;
+      clip-path: polygon(0 24%, 50% 51%, 50% 100%, 0 74%);
+    }
+
+    .iso-cube .f-right {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 50%;
+      height: 60%;
+      background: var(--blue);
+      clip-path: polygon(50% 51%, 100% 24%, 100% 74%, 50% 100%);
+    }
+
+    .iso-cube.lg {
+      width: 64px;
+      height: 64px;
+    }
+
+    /* ---------- Header ---------- */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: #fff;
+      border-bottom: 2px solid var(--navy);
+      transition: box-shadow .2s;
+    }
+
+    header.scrolled {
+      box-shadow: 0 6px 0 -2px rgba(18, 35, 63, 0.06);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 32px;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-weight: 800;
+      font-size: 19px;
+      letter-spacing: -0.02em;
+      color: var(--navy);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 30px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      position: relative;
+      padding-bottom: 3px;
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 0;
+      height: 2px;
+      background: var(--orange);
+      transition: width .18s;
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .nav-cta {
+      background: var(--orange);
+      color: var(--navy-2);
+      border: 2px solid var(--navy);
+      padding: 10px 22px;
+      border-radius: var(--radius-pill);
+      font-weight: 800;
+      font-size: 14.5px;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 4px 4px 0 var(--navy);
+      transition: transform .15s, box-shadow .15s;
+    }
+
+    .nav-cta:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0 var(--navy);
+    }
+
+    .nav-cta:active {
+      transform: translate(0, 0);
+      box-shadow: 2px 2px 0 var(--navy);
+    }
+
+    /* ---------- Hero (ШАПКА — НЕ ТРОГАЕМ) ---------- */
+    .hero {
+      background:
+        radial-gradient(50% 38% at 22% 78%, rgba(230, 244, 255, 0.28) 0%, rgba(230, 244, 255, 0) 65%),
+        radial-gradient(65% 55% at 95% 8%, rgba(47, 143, 209, 0.55) 0%, rgba(47, 143, 209, 0) 62%),
+        radial-gradient(70% 55% at 0% 5%, rgba(242, 148, 30, 0.22) 0%, rgba(242, 148, 30, 0) 60%),
+        var(--navy-2);
+      color: #fff;
+      padding: 76px 0 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 56px;
+      align-items: end;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--orange);
+      color: var(--navy-2);
+      padding: 7px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 22px;
+      letter-spacing: 0.01em;
+    }
+
+    .eyebrow-pill .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--navy-2);
+    }
+
+    h1 {
+      font-size: 48px;
+      line-height: 1.08;
+      letter-spacing: -0.025em;
+      margin: 0 0 20px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    h1 .hl {
+      color: var(--orange);
+    }
+
+    .hero p.lead {
+      font-size: 18px;
+      line-height: 1.55;
+      color: rgba(255, 255, 255, 0.78);
+      max-width: 480px;
+      margin: 0 0 30px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 44px;
+    }
+
+    .btn-primary {
+      background: var(--orange);
+      color: var(--navy-2);
+      border: 2px solid var(--navy-2);
+      padding: 15px 26px;
+      border-radius: var(--radius-pill);
+      font-weight: 800;
+      font-size: 15.5px;
+      cursor: pointer;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.28);
+      transition: transform .15s, box-shadow .15s;
+    }
+
+    .btn-primary:hover {
+      transform: translate(-3px, -3px);
+      box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.28);
+    }
+
+    .btn-primary:active {
+      transform: translate(0, 0);
+      box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.28);
+    }
+
+    .btn-primary svg {
+      width: 16px;
+      height: 16px;
+      transition: transform .15s;
+    }
+
+    .btn-primary:hover svg {
+      transform: translateX(3px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: #fff;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      padding: 14px 25px;
+      border-radius: var(--radius-pill);
+      font-weight: 800;
+      font-size: 15.5px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color .15s, background .15s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-ghost:hover {
+      border-color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .stat {
+      padding: 20px 18px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+    }
+
+    .stat b {
+      display: block;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--orange);
+      margin-bottom: 4px;
+    }
+
+    .stat span {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.68);
+      line-height: 1.4;
+    }
+
+    /* ---------- Chat card ---------- */
+    .chat-card {
+      background: #fff;
+      border: 2px solid rgba(255, 255, 255, 0.28);
+      border-radius: 22px;
+      box-shadow: 10px 10px 0 var(--orange), 0 40px 80px -30px rgba(11, 25, 48, 0.6);
+      overflow: hidden;
+      margin-bottom: 44px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .chat-head {
+      background: var(--navy-soft);
+      color: #fff;
+      padding: 22px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 2px solid var(--navy-2);
+    }
+
+    .chat-head .avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: var(--orange);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .chat-head .avatar svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--navy-2);
+    }
+
+    .chat-head b {
+      display: block;
+      font-size: 16.5px;
+    }
+
+    .chat-head span {
+      display: block;
+      font-size: 13px;
+      opacity: .8;
+    }
+
+    .chat-head .status {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      white-space: nowrap;
+    }
+
+    .chat-head .status .pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--orange);
+      box-shadow: 0 0 0 0 rgba(242, 148, 30, 0.6);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(242, 148, 30, 0.55);
+      }
+
+      70% {
+        box-shadow: 0 0 0 9px rgba(242, 148, 30, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(242, 148, 30, 0);
+      }
+    }
+
+    .chat-body {
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      min-height: 400px;
+      max-height: 560px;
+      overflow-y: auto;
+      background: var(--cream);
+    }
+
+    .bubble {
+      max-width: 82%;
+      padding: 13px 17px;
+      border-radius: 14px;
+      font-size: 15.5px;
+      line-height: 1.5;
+    }
+
+    .bubble.bot {
+      background: #fff;
+      color: var(--ink);
+      align-self: flex-start;
+      border: 1.5px solid var(--line-soft);
+      border-bottom-left-radius: 4px;
+    }
+
+    .bubble.user {
+      background: var(--navy);
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+      font-weight: 600;
+    }
+
+    .bubble.bot.card {
+      background: #fff;
+      border: 1.5px solid var(--navy);
+      padding: 15px;
+    }
+
+    .flat-preview {
+      display: flex;
+      gap: 13px;
+      align-items: center;
+    }
+
+    .flat-thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(180deg, var(--blue) 0%, var(--blue-deep) 100%);
+    }
+
+    .flat-thumb::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      top: 34%;
+      background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.4) 0 6px, transparent 6px 15px);
+    }
+
+    .flat-preview b {
+      font-size: 14.5px;
+      display: block;
+      color: var(--navy);
+    }
+
+    .flat-preview span {
+      font-size: 13px;
+      color: var(--ink-soft);
+      font-weight: 700;
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 10px;
+      padding: 18px 22px;
+      border-top: 2px solid var(--navy-2);
+      background: #fff;
+    }
+
+    .chat-input-row input {
+      flex: 1;
+      border: 2px solid var(--line-soft);
+      border-radius: var(--radius-pill);
+      padding: 13px 20px;
+      font-family: inherit;
+      font-size: 15px;
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .chat-input-row input:focus {
+      border-color: var(--blue);
+    }
+
+    .send-btn {
+      background: var(--orange);
+      border: 2px solid var(--navy-2);
+      color: var(--navy-2);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .15s;
+    }
+
+    .send-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .send-btn:hover {
+      transform: scale(1.08) rotate(8deg);
+    }
+
+    /* ---------- Sections shared ---------- */
+    section {
+      padding: 80px 0;
+    }
+
+    .glow-section {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    /* ТЁМНЫЕ СЕКЦИИ: оранжевое радиальное пятно в центре */
+    .glow-section::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(50% 50% at 50% 50%, rgba(242, 148, 30, 0.35) 0%, rgba(242, 148, 30, 0.12) 40%, rgba(242, 148, 30, 0) 72%);
+    }
+
+    /* СВЕТЛЫЕ СЕКЦИИ: голубое радиальное пятно в центре */
+    .glow-section.glow-light::before {
+      background:
+        radial-gradient(50% 50% at 50% 50%, rgba(47, 143, 209, 0.28) 0%, rgba(47, 143, 209, 0.10) 40%, rgba(47, 143, 209, 0) 72%);
+    }
+
+    .glow-section>.wrap {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ---------- Плавный переход тёмное→светлое по краям светлых секций ---------- */
+    /* Тот самый градиент из var(--navy-2) к прозрачному — возвращён */
+    #features::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(to bottom, var(--navy-2) 0, transparent 240px),
+        linear-gradient(to top, var(--navy-2) 0, transparent 240px);
+    }
+
+    #trust::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: linear-gradient(to bottom, var(--navy-2) 0, transparent 240px);
+    }
+
+    #cta::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: linear-gradient(to top, var(--navy-2) 0, transparent 240px);
+    }
+
+    .section-head {
+      max-width: 640px;
+      margin: 0 auto 46px;
+      text-align: center;
+    }
+
+    .section-head h2 {
+      font-size: 34px;
+      letter-spacing: -0.02em;
+      margin: 0 0 12px;
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    .section-head p {
+      color: var(--ink-soft);
+      font-size: 16px;
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--orange-dark);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .tag::before {
+      content: "";
+      width: 22px;
+      height: 3px;
+      background: var(--orange);
+      border-radius: 2px;
+    }
+
+    .section-head.on-dark h2 {
+      color: #fff;
+    }
+
+    .section-head.on-dark p {
+      color: rgba(255, 255, 255, 0.68);
+    }
+
+    .section-head.on-dark .tag {
+      color: var(--orange);
+    }
+
+    /* ---------- Feature grid ---------- */
+    #features {
+      background: #fff;
+    }
+
+    .feat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px;
+    }
+
+    .feat-card {
+      background: #fff;
+      border: 2px solid var(--navy);
+      border-radius: var(--radius);
+      padding: 26px 22px;
+      transition: transform .18s, box-shadow .18s;
+      box-shadow: 5px 5px 0 var(--line-soft);
+    }
+
+    .feat-card:nth-child(1) {
+      box-shadow: 5px 5px 0 var(--orange);
+    }
+
+    .feat-card:nth-child(2) {
+      box-shadow: 5px 5px 0 var(--blue);
+    }
+
+    .feat-card:nth-child(3) {
+      box-shadow: 5px 5px 0 var(--orange);
+    }
+
+    .feat-card:nth-child(4) {
+      box-shadow: 5px 5px 0 var(--blue);
+    }
+
+    .feat-card:hover {
+      transform: translate(-3px, -3px);
+    }
+
+    .feat-card:nth-child(1):hover {
+      box-shadow: 8px 8px 0 var(--orange);
+    }
+
+    .feat-card:nth-child(2):hover {
+      box-shadow: 8px 8px 0 var(--blue);
+    }
+
+    .feat-card:nth-child(3):hover {
+      box-shadow: 8px 8px 0 var(--orange);
+    }
+
+    .feat-card:nth-child(4):hover {
+      box-shadow: 8px 8px 0 var(--blue);
+    }
+
+    .feat-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 11px;
+      margin-bottom: 16px;
+      background: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .feat-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: #fff;
+    }
+
+    .feat-card h3 {
+      font-size: 16.5px;
+      margin: 0 0 8px;
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    .feat-card p {
+      font-size: 14px;
+      color: var(--ink-soft);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* ---------- How it works (navy band) ---------- */
+    .how-band {
+      background: var(--navy-2);
+      color: #fff;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+    }
+
+    .step {
+      background: var(--navy);
+      border: 2px solid var(--navy-soft);
+      border-radius: var(--radius);
+      padding: 30px 26px;
+      position: relative;
+    }
+
+    .step-num {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--orange);
+      color: var(--navy-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+      margin-bottom: 18px;
+    }
+
+    .step h3 {
+      font-size: 18px;
+      margin: 0 0 10px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .step p {
+      font-size: 14.5px;
+      color: rgba(255, 255, 255, 0.68);
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    /* ---------- Trust grid ---------- */
+    #trust {
+      background: #fff;
+    }
+
+    .trust-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 2px solid var(--navy);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .trust-card {
+      padding: 30px 26px;
+      border-right: 2px solid var(--navy);
+    }
+
+    .trust-card:last-child {
+      border-right: none;
+    }
+
+    .trust-card .num {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--orange-dark);
+      letter-spacing: -0.02em;
+    }
+
+    .trust-card p {
+      font-size: 14.5px;
+      color: var(--ink-soft);
+      margin: 10px 0 0;
+      line-height: 1.5;
+    }
+
+    /* ---------- CTA band ---------- */
+    #cta {
+      background: #fff;
+    }
+
+    .cta-band {
+      background: var(--orange);
+      border: 2px solid var(--navy);
+      border-radius: var(--radius);
+      padding: 54px;
+      text-align: center;
+    }
+
+    .cta-band h2 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin: 0 0 12px;
+      color: var(--navy-2);
+    }
+
+    .cta-band p {
+      color: var(--navy-2);
+      opacity: .8;
+      font-size: 16px;
+      margin: 0 0 28px;
+    }
+
+    .cta-band .btn-primary {
+      background: var(--navy-2);
+      color: #fff;
+      border-color: var(--navy-2);
+      box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.35);
+    }
+
+    .cta-band .btn-primary:hover {
+      box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.35);
+    }
+
+    /* ---------- Footer ---------- */
+    footer {
+      background: var(--navy-2);
+      color: rgba(255, 255, 255, 0.7);
+      padding: 48px 0 26px;
+      border-top: 4px solid var(--orange);
+      position: relative;
+      overflow: hidden;
+    }
+
+    footer .wrap {
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 24px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 44px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      font-size: 14px;
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .footer-links a:hover {
+      color: var(--orange);
+    }
+
+    .footer-col h4 {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.4);
+      margin: 0 0 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .footer-col {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 22px;
+      font-size: 12.5px;
+      color: rgba(255, 255, 255, 0.45);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    @media (max-width:920px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .stat {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+      }
+
+      .feat-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .steps {
+        grid-template-columns: 1fr;
+      }
+
+      .trust-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .trust-card {
+        border-right: none;
+        border-bottom: 2px solid var(--navy);
+      }
+
+      .trust-card:last-child {
+        border-bottom: none;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      h1 {
+        font-size: 34px;
+      }
+
+      .cta-band {
+        padding: 36px 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header id="siteHeader">
+    <div class="nav">
+      <div class="logo">
+        <span class="iso-cube"><span class="f-top"></span><span class="f-left"></span><span
+            class="f-right"></span></span>
+        КвартираИИ
+      </div>
+      <nav class="nav-links">
+        <a href="#features">Возможности</a>
+        <a href="#how">Как это работает</a>
+        <a href="#assistant">Ассистент</a>
+      </nav>
+      <button class="nav-cta" onclick="document.getElementById('assistant').scrollIntoView({behavior:'smooth'})">Начать
+        поиск</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow-pill"><span class="dot"></span>Новый сервис на базе ИИ · Воронеж</div>
+        <h1>Квартира для <span class="hl">покупки</span> найдётся сама</h1>
+        <p class="lead">Продаём квартиры только в Воронеже. Опишите ассистенту бюджет, район и пожелания — он соберёт
+          подходящие варианты из базы, сравнит цены и подскажет, на что смотреть перед просмотром.</p>
+        <div class="hero-actions">
+          <button class="btn-primary"
+            onclick="document.getElementById('assistant').scrollIntoView({behavior:'smooth'})">
+            Спросить ассистента
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </button>
+          <a href="#how" class="btn-ghost">Как это устроено</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat"><b id="apartmentCount">12 400+</b><span>квартир в базе на продажу</span></div>
+          <div class="stat"><b>10 сек</b><span>на подбор первых вариантов</span></div>
+          <div class="stat"><b>Воронеж</b><span>работаем только в этом городе</span></div>
+        </div>
+      </div>
+
+      <div class="chat-card" id="assistant">
+        <div class="chat-head">
+          <div class="avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M3 11l9-7 9 7" />
+              <path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9" />
+            </svg>
+          </div>
+          <div>
+            <b>Ассистент по квартирам</b>
+            <span>Отвечает по подбору жилья</span>
+          </div>
+          <div class="status"><span class="pulse"></span>Подключение — скоро</div>
+        </div>
+        <div class="chat-body" id="chatBody">
+          <div class="bubble bot">Привет! Расскажите, какую квартиру в Воронеже подобрать для покупки — бюджет, район,
+            количество комнат — и я начну поиск по базе.</div>
+          <div class="bubble user">Ищу двушку рядом с центром, бюджет до 6 млн ₽</div>
+          <div class="bubble bot">Смотрю варианты в пределах 10 минут пешком от центра. Нашёл в базе три подходящих —
+            показать сначала самый бюджетный?</div>
+          <div class="bubble bot card">
+            <div class="flat-preview">
+              <div class="flat-thumb"></div>
+              <div>
+                <b>2-комн., 54 м², 5 мин. пешком</b>
+                <span>5 800 000 ₽ · есть балкон</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="Например: студия в центре до 4,2 млн ₽">
+          <button class="send-btn" id="chatSend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 12h16M13 6l7 6-7 6" />
+            </svg></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- СВЕТЛЫЙ блок: голубое пятно в центре + переход тёмное→светлое по краям -->
+  <section class="features reveal glow-section glow-light" id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="tag">Возможности</span>
+        <h2>Всё, что нужно для покупки — в одном чате</h2>
+        <p>Ассистент понимает обычную речь и работает как персональный риелтор по продаже квартир в Воронеже, который
+          никогда не спит.</p>
+      </div>
+      <div class="feat-grid">
+        <div class="feat-card">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg></div>
+          <h3>Поиск по описанию</h3>
+          <p>Опишите желаемую квартиру своими словами — ассистент переведёт это в фильтры поиска по базе.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 3v18h18" />
+              <path d="M7 15l4-4 3 3 5-6" />
+            </svg></div>
+          <h3>Сравнение вариантов</h3>
+          <p>Ассистент сопоставит цену, площадь и район, чтобы показать честное соотношение.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg></div>
+          <h3>Учёт района</h3>
+          <p>Учитывает транспорт, школы и магазины рядом — не только адрес и цену.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="8" cy="15" r="4" />
+              <path d="M10.5 12.5L19 4M17 6l2 2M14 9l2 2" />
+            </svg></div>
+          <h3>Бронирование квартиры</h3>
+          <p>Забронировать понравившуюся квартиру можно бесплатно на 3 часа, чтобы успеть доехать и посмотреть. Бронь на
+            месяц — платная.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ТЁМНЫЙ блок: оранжевое пятно в центре -->
+  <section class="how-band reveal glow-section" id="how">
+    <div class="wrap">
+      <div class="section-head on-dark">
+        <span class="tag">Как это работает</span>
+        <h2>Три шага до подходящей квартиры</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Опишите запрос</h3>
+          <p>Напишите ассистенту, какую квартиру ищете: бюджет, район, количество комнат, важные детали.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>Получите подборку</h3>
+          <p>Ассистент подберёт варианты из базы и коротко объяснит, чем каждый из них хорош.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>Уточняйте и бронируйте</h3>
+          <p>Задавайте вопросы прямо в чате и бронируйте понравившийся вариант — первые 3 часа бесплатно.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- СВЕТЛЫЙ блок: голубое пятно в центре + переход тёмное→светлое по краям -->
+  <section class="reveal glow-section glow-light" id="trust">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="tag">Почему это удобно</span>
+        <h2>Сервис, которому можно доверить покупку квартиры</h2>
+      </div>
+      <div class="trust-grid">
+        <div class="trust-card">
+          <div class="num">24/7</div>
+          <p>Ассистент отвечает в любое время — не нужно ждать риелтора или менеджера.</p>
+        </div>
+        <div class="trust-card">
+          <div class="num">0 ₽</div>
+          <p>Поиск и подбор вариантов бесплатны — платите только за саму квартиру при покупке.</p>
+        </div>
+        <div class="trust-card">
+          <div class="num">100%</div>
+          <p>Все объявления проверяются перед показом, чтобы исключить неактуальные варианты.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- СВЕТЛЫЙ блок: голубое пятно в центре + переход тёмное→светлое по краям -->
+  <section class="reveal glow-section glow-light" id="cta">
+    <div class="wrap">
+      <div class="cta-band">
+        <h2>Готовы начать поиск?</h2>
+        <p>Опишите квартиру мечты в чате — остальное возьмёт на себя ассистент.</p>
+        <button class="btn-primary" onclick="document.getElementById('assistant').scrollIntoView({behavior:'smooth'})">
+          Открыть чат с ассистентом
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="footer-logo">
+          <span class="iso-cube"><span class="f-top"></span><span class="f-left"></span><span
+              class="f-right"></span></span>
+          КвартираИИ
+        </div>
+        <div class="footer-links">
+          <div class="footer-col">
+            <h4>Сервис</h4>
+            <a href="#features">Возможности</a>
+            <a href="#how">Как это работает</a>
+            <a href="#assistant">Ассистент</a>
+          </div>
+          <div class="footer-col">
+            <h4>Компания</h4>
+            <a href="#">О нас</a>
+            <a href="#">Контакты</a>
+            <a href="#">Вакансии</a>
+          </div>
+          <div class="footer-col">
+            <h4>Поддержка</h4>
+            <a href="#">Помощь</a>
+            <a href="#">Условия использования</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 КвартираИИ. Продажа квартир в Воронеже.</span>
+        <span>Демо-версия интерфейса · ИИ-ассистент будет подключён позже</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const chatBody = document.getElementById('chatBody');
+    const chatInput = document.getElementById('chatInput');
+    const chatSend = document.getElementById('chatSend');
+
+    function addBubble(text, who) {
+      const b = document.createElement('div');
+      b.className = 'bubble ' + who;
+      b.textContent = text;
+      chatBody.appendChild(b);
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    const COMPLEX_IMAGES = {
+      'ЖК Солнечный': 'images/complexes/complex_1_ЖК_Солнечный.jpg',
+      'ЖК Речной': 'images/complexes/complex_2_ЖК_Речной.jpg',
+      'ЖК Северный': 'images/complexes/complex_3_ЖК_Северный.jpg',
+      'ЖК Центральный': 'images/complexes/complex_4_ЖК_Центральный.jpg',
+      'ЖК Парковый': 'images/complexes/complex_5_ЖК_Парковый.jpg',
+      'ЖК Лесной': 'images/complexes/complex_6_ЖК_Лесной.jpg',
+      'ЖК Новый город': 'images/complexes/complex_7_ЖК_Новый_город.jpg'
+    };
+
+    function addApartmentCard(apt) {
+      const imgPath = COMPLEX_IMAGES[apt.complex];
+      const b = document.createElement('div');
+      b.className = 'bubble bot card';
+      b.innerHTML = `
+      <div class="flat-preview">
+        ${imgPath
+          ? `<img class="flat-thumb" src="http://127.0.0.1:8000/${imgPath}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;">`
+          : `<div class="flat-thumb"></div>`}
+        <div>
+          <b>${apt.rooms}-комн., ${apt.area} м², эт. ${apt.floor}</b>
+          <span>${apt.price.toLocaleString('ru-RU')} ₽ · ${apt.complex}</span>
+        </div>
+      </div>
+    `;
+      chatBody.appendChild(b);
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    const API_URL = 'http://127.0.0.1:8000/chat';
+    const sessionId = 'web-' + Math.random().toString(36).slice(2);
+
+    async function handleSend() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      addBubble(text, 'user');
+      chatInput.value = '';
+
+      addBubble('Печатает...', 'bot');
+      const typingBubble = chatBody.lastChild;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId, message: text })
+        });
+
+        if (!response.ok) throw new Error('Ошибка сервера: ' + response.status);
+
+        const data = await response.json();
+        typingBubble.remove();
+        addBubble(data.message || 'Пустой ответ от сервера.', 'bot');
+
+        const complexById = {};
+        (data.complexes || []).forEach(c => { complexById[c.id] = c; });
+
+        if (Array.isArray(data.apartments) && data.apartments.length > 0) {
+          data.apartments.slice(0, 3).forEach(apt => addApartmentCard(apt));
+        }
+
+      } catch (err) {
+        typingBubble.remove();
+        addBubble('Не удалось связаться с сервером. Проверь, запущен ли бэкенд (uvicorn).', 'bot');
+        console.error(err);
+      }
+    }
+
+    chatSend.addEventListener('click', handleSend);
+    chatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleSend();
+    });
+
+    function updateApartmentCount(total) {
+      document.getElementById('apartmentCount').textContent = total.toLocaleString('ru-RU') + '+';
+    }
+
+    const revealEls = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(el => io.observe(el));
+
+    const header = document.getElementById('siteHeader');
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('scrolled', window.scrollY > 8);
+    });
+  </script>
+
+</body>
+
+</html>

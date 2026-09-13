@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from agent import ApartmentAgent
@@ -15,21 +17,17 @@ app = FastAPI(
     version="1.0.0"
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.mount("/images", StaticFiles(directory="images"), name="images")
+
 create_database()
 add_test_apartments()
 update_complex_images()
-
-
-# Храним отдельного агента для каждого пользователя.
-# Благодаря этому каждый пользователь сохраняет свой контекст диалога.
-agents = {}
-
-
-app = FastAPI(
-    title="AI-агент по подбору квартир",
-    description="API для поиска и сравнения квартир",
-    version="1.0.0"
-)
 
 
 # Храним отдельного агента для каждого пользователя.
