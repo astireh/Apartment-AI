@@ -79,7 +79,7 @@ Excel используется как каталог данных, которы�
 
 Для синхронизации используется `import_excel.py`.
 
-При импорте:
+**При импорте:**
 
 - существующие ЖК и квартиры обновляются;
 - новые записи добавляются;
@@ -110,7 +110,7 @@ Backend предоставляет два основных endpoint:
 
 `GET /health`
 
-Ответ:
+**Ответ:**
 
 ```json
 {
@@ -122,7 +122,7 @@ Backend предоставляет два основных endpoint:
 
 `POST /chat`
 
-Тело запроса:
+**Тело запроса:**
 
 ```json
 {
@@ -133,7 +133,7 @@ Backend предоставляет два основных endpoint:
 
 `session_id` используется для сохранения контекста конкретного пользователя.
 
-Пример ответа:
+**Пример ответа:**
 
 ```json
 {
@@ -183,56 +183,36 @@ Backend предоставляет два основных endpoint:
 
 ![Структура проекта](docs/structure.png)
 
-## Установка
+## Установка и запуск проекта с нуля
 
-**1. Клонирование репозитория**
-```bash
-git clone <repository-url>
-cd Apartment-AI
+**Шаг 1 — клонируй репозиторий**
+```json
+git clone https://github.com/astireh/Apartment-AI.git
+cd Apartment-AI/backend
 ```
-
-**2. Создание виртуального окружения**
-```bash
-python -m venv .venv
+**Шаг 2 — создай и активируй виртуальное окружение**
+```json
+python -m venv venv
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+venv\Scripts\activate
 ```
-
-**3. Активация окружения**
-
-Windows PowerShell:
-```bash
-.venv\Scripts\activate
+**Шаг 3 — поставь зависимости**
+```json
+pip install -r requirements.txt
 ```
-
-**4. Установка зависимостей**
-```bash
-pip install -r backend/requirements.txt
+**Шаг 4 — настрой GigaChat**
+Создай файл .env в папке backend/ (по образцу .env.example):
+```json
+GIGACHAT_CREDENTIALS=твои_credentials
 ```
+Получить их можно на https://developers.sber.ru/portal/products/gigachat
 
-**5. Настройка переменных окружения**
-
-Создайте файл `backend/.env` и добавьте необходимые credentials для $\color{#F2941E}{\textsf{GigaChat}}$.
-
-Пример структуры находится в `backend/.env.example`.
-
-Файл `.env` не должен добавляться в Git.
-
-## Запуск backend
-
-Перейдите в папку backend:
-```bash
-cd backend
-```
-
-Запустите сервер:
-```bash
+**Шаг 5 — запусти backend**
+```json
 uvicorn api:app --reload
 ```
-
-После запуска API будет доступен по адресу: `http://127.0.0.1:8000`
-
-Интерактивная документация Swagger: `http://127.0.0.1:8000/docs`
-
-Проверка состояния: `http://127.0.0.1:8000/health`
+**Шаг 6 — открой сайт**
+Зайди в папку Apartment-AI/frontend, открой index.html двойным кликом в браузере. Backend должен продолжать работать в терминале.
 
 ## Пример диалога
 
