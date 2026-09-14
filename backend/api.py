@@ -69,3 +69,8 @@ def chat(request: ChatRequest):
     )
 
     return result
+
+
+# Раздача фронтенда — должна идти ПОСЛЕДНЕЙ, после /health и /chat,
+# иначе она "перехватит" эти пути на себя.
+app.mount("/", StaticFiles(directory="../frontend", html=True), name="frontend")
