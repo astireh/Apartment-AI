@@ -71,14 +71,14 @@ def update_complex_images():
     connection = get_connection()
     cursor = connection.cursor()
 
-    complex_images = {
-        1: "images/complexes/complex_1_ЖК_Солнечный.jpg",
-        2: "images/complexes/complex_2_ЖК_Речной.jpg",
-        3: "images/complexes/complex_3_ЖК_Северный.jpg",
-        4: "images/complexes/complex_4_ЖК_Центральный.jpg",
-        5: "images/complexes/complex_5_ЖК_Парковый.jpg",
-        6: "images/complexes/complex_7_ЖК_Новый_город.jpg",
-        7: "images/complexes/complex_6_ЖК_Лесной.jpg"
+        complex_images = {
+        1: "images/complexes/complex_1_sunny.jpg",
+        2: "images/complexes/complex_2_river.jpg",
+        3: "images/complexes/complex_3_severny.jpg",
+        4: "images/complexes/complex_4_central.jpg",
+        5: "images/complexes/complex_5_park.jpg",
+        6: "images/complexes/complex_7_newcity.jpg",
+        7: "images/complexes/complex_6_forest.jpg"
     }
     for complex_id, image_path in complex_images.items():
         cursor.execute("""
