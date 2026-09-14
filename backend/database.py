@@ -71,7 +71,7 @@ def update_complex_images():
     connection = get_connection()
     cursor = connection.cursor()
 
-        complex_images = {
+    complex_images = {
         1: "images/complexes/complex_1_sunny.jpg",
         2: "images/complexes/complex_2_river.jpg",
         3: "images/complexes/complex_3_severny.jpg",
