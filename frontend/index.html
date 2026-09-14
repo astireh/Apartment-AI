@@ -1274,13 +1274,13 @@
     }
 
     const COMPLEX_IMAGES = {
-      'ЖК Солнечный': 'images/complexes/complex_1_sunny.jpg',
-      'ЖК Речной': 'images/complexes/complex_2_river.jpg',
-      'ЖК Северный': 'images/complexes/complex_3_severny.jpg',
-      'ЖК Центральный': 'images/complexes/complex_4_central.jpg',
-      'ЖК Парковый': 'images/complexes/complex_5_park.jpg',
-      'ЖК Лесной': 'images/complexes/complex_6_forest.jpg',
-      'ЖК Новый город': 'images/complexes/complex_7_newcity.jpg'
+      'ЖК Солнечный': 'images/complexes/complex_1_ЖК_Солнечный.jpg',
+      'ЖК Речной': 'images/complexes/complex_2_ЖК_Речной.jpg',
+      'ЖК Северный': 'images/complexes/complex_3_ЖК_Северный.jpg',
+      'ЖК Центральный': 'images/complexes/complex_4_ЖК_Центральный.jpg',
+      'ЖК Парковый': 'images/complexes/complex_5_ЖК_Парковый.jpg',
+      'ЖК Лесной': 'images/complexes/complex_6_ЖК_Лесной.jpg',
+      'ЖК Новый город': 'images/complexes/complex_7_ЖК_Новый_город.jpg'
     };
 
     function addApartmentsRow(apartments) {
@@ -1293,7 +1293,7 @@
         card.className = 'apt-card';
         card.innerHTML = `
           ${imgPath
-            ? `<img class="apt-photo" src="http://127.0.0.1:8000/${imgPath}" alt="${apt.complex}">`
+            ? `<img class="apt-photo" src="/${imgPath}" alt="${apt.complex}">`
             : `<div class="apt-photo"></div>`}
           <div class="apt-info">
             <b>${apt.rooms}-комн., ${apt.area} м², эт. ${apt.floor}</b>
@@ -1308,7 +1308,7 @@
       chatBody.scrollTop = chatBody.scrollHeight;
     }
 
-    const API_URL = 'http://127.0.0.1:8000/chat';
+    const API_URL = '/chat';
     const sessionId = 'web-' + Math.random().toString(36).slice(2);
 
     async function handleSend() {
